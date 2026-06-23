@@ -64,25 +64,25 @@ export default async function CourseDetailPage({
         )}
         <div className="container-page grid gap-8 py-12 lg:grid-cols-[1.6fr_1fr]">
           <div>
-            <nav className="flex items-center gap-2 text-sm text-white/80">
-              <Link href="/courses" className="transition-colors hover:text-white">
+            <nav className="flex items-center gap-2 text-sm font-medium text-white">
+              <Link href="/courses" className="opacity-70 transition-opacity hover:opacity-100">
                 Courses
               </Link>
-              <span>/</span>
+              <span className="opacity-50">/</span>
               <Link
                 href={`/courses?level=${course.level}`}
-                className="transition-colors hover:text-white"
+                className="opacity-70 transition-opacity hover:opacity-100"
               >
                 {course.level}
               </Link>
             </nav>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="tag border-white/20 bg-white/15 text-white">
+              <span className="tag border-white/30 bg-white/20 text-white">
                 {course.level}
               </span>
               {course.code && (
-                <span className="tag border-white/15 bg-white/10 text-white">
+                <span className="tag border-white/25 bg-white/15 text-white">
                   {course.code}
                 </span>
               )}
@@ -91,9 +91,9 @@ export default async function CourseDetailPage({
             <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
               {course.title}
             </h1>
-            <p className="mt-3 max-w-2xl text-lg text-white/90">{course.subtitle}</p>
+            <p className="mt-3 max-w-2xl text-lg text-white">{course.subtitle}</p>
 
-            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/80">
+            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white">
               <span className="tnum inline-flex items-center gap-1.5">
                 <PlayCircleIcon width={15} height={15} />
                 {formatCompact(course.views)} views
@@ -118,12 +118,12 @@ export default async function CourseDetailPage({
               <div className="mt-5 flex items-center gap-3">
                 <Avatar initials={instructor.initials} size={40} onPanel />
                 <div className="text-sm">
-                  <p className="text-white/70">Created by</p>
+                  <p className="text-white opacity-70">Created by</p>
                   <p className="font-semibold text-white">{instructor.name}</p>
                 </div>
               </div>
             )}
-            <p className="mt-4 text-xs text-white/60">
+            <p className="mt-4 text-xs text-white opacity-60">
               Last updated {course.lastUpdated}
             </p>
           </div>
