@@ -62,7 +62,7 @@ export default async function CourseDetailPage({
             <div className="pointer-events-none absolute inset-0 bg-ink-panel/60" />
           </>
         )}
-        <div className="container-page grid gap-8 py-12 lg:grid-cols-[1.6fr_1fr]">
+        <div className="container-page relative z-10 grid gap-8 py-12 lg:grid-cols-[1.6fr_1fr]">
           <div>
             <nav className="flex items-center gap-2 text-sm font-medium text-white">
               <Link href="/courses" className="hover:underline">Courses</Link>
