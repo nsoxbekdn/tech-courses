@@ -56,10 +56,10 @@ export default async function CourseDetailPage({
               alt=""
               fill
               sizes="100vw"
-              className="object-cover opacity-20"
+              className="object-cover opacity-40"
               priority
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-panel via-ink-panel/80 to-ink-panel/40" />
+            <div className="pointer-events-none absolute inset-0 bg-ink-panel/55" />
           </>
         )}
         <div className="container-page grid gap-8 py-12 lg:grid-cols-[1.6fr_1fr]">

@@ -88,10 +88,10 @@ export function LessonPlayer({ course }: { course: Course }) {
   return (
     <div className="flex min-h-screen flex-col bg-ink-panel text-on-panel">
       {/* Top bar */}
-      <header className="flex items-center gap-4 border-b border-white/10 px-4 py-3 lg:px-6">
+      <header className="flex items-center gap-4 border-b border-white/15 px-4 py-3 lg:px-6">
         <Link
           href={`/courses/${course.slug}`}
-          className="inline-flex items-center gap-2 text-sm text-on-panel-soft transition-colors hover:text-on-panel"
+          className="inline-flex items-center gap-2 text-sm font-medium text-on-panel transition-colors hover:text-accent"
         >
           <span aria-hidden>←</span>
           <span className="hidden max-w-[40ch] truncate font-medium sm:inline">{course.title}</span>
@@ -168,7 +168,7 @@ export function LessonPlayer({ course }: { course: Course }) {
 
           {/* Lesson detail */}
           {current && (
-            <div className="mx-auto w-full max-w-4xl px-4 py-7 lg:px-8">
+            <div className="mx-auto w-full max-w-4xl border-t border-white/10 px-4 py-7 lg:px-8">
               <p className="font-mono text-xs uppercase tracking-wider text-on-panel-soft">
                 Lesson <span className="tnum">{currentIndex + 1}</span> of{" "}
                 <span className="tnum">{flat.length}</span>
@@ -210,14 +210,14 @@ export function LessonPlayer({ course }: { course: Course }) {
               </div>
 
               {/* Prev / next */}
-              <div className="mt-7 grid gap-3 border-t border-white/10 pt-6 sm:grid-cols-2">
+              <div className="mt-7 grid gap-3 border-t border-white/15 pt-6 sm:grid-cols-2">
                 {currentIndex > 0 ? (
                   <button
                     onClick={() => goTo(currentIndex - 1)}
-                    className="group rounded-[var(--radius)] border border-white/10 p-3 text-left transition-colors hover:border-white/25 hover:bg-white/5"
+                    className="group rounded-[var(--radius)] border border-white/20 bg-white/5 p-3 text-left transition-colors hover:border-white/40 hover:bg-white/10"
                   >
-                    <span className="text-xs text-on-panel-soft">← Previous</span>
-                    <span className="mt-0.5 block truncate text-sm font-medium text-on-panel">
+                    <span className="text-xs font-medium text-on-panel-soft">← Previous</span>
+                    <span className="mt-1 block truncate text-sm font-semibold text-on-panel">
                       {flat[currentIndex - 1].lesson.title}
                     </span>
                   </button>
@@ -227,10 +227,10 @@ export function LessonPlayer({ course }: { course: Course }) {
                 {currentIndex < flat.length - 1 ? (
                   <button
                     onClick={() => goTo(currentIndex + 1)}
-                    className="group rounded-[var(--radius)] border border-white/10 p-3 text-right transition-colors hover:border-white/25 hover:bg-white/5"
+                    className="group rounded-[var(--radius)] border border-white/20 bg-white/5 p-3 text-right transition-colors hover:border-white/40 hover:bg-white/10"
                   >
-                    <span className="text-xs text-on-panel-soft">Up next →</span>
-                    <span className="mt-0.5 block truncate text-sm font-medium text-on-panel">
+                    <span className="text-xs font-medium text-on-panel-soft">Up next →</span>
+                    <span className="mt-1 block truncate text-sm font-semibold text-on-panel">
                       {flat[currentIndex + 1].lesson.title}
                     </span>
                   </button>
