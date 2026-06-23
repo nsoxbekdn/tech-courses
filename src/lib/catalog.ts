@@ -42,8 +42,9 @@ function buildCourse(c: NonNullable<DbCourse>): Course {
     .sort((a, b) => a.position - b.position)
     .map((l, i) => ({
       id: l.id,
-      title: l.title,
+      title: l.titleOverride || l.title,
       youtubeId: l.ytVideoId,
+      thumbnail: l.thumbnail || `https://i.ytimg.com/vi/${l.ytVideoId}/mqdefault.jpg`,
       durationMinutes: Math.max(1, Math.round(l.seconds / 60)),
       views: l.views,
       isPreview: i === 0,

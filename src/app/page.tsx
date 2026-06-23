@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { getCourses, getChannelStats, getInstructorWithStats } from "@/lib/catalog";
+import { getCurrentUser, getUserEnrollments } from "@/lib/auth";
 import { LEVELS } from "@/lib/course-utils";
 import { formatCompact } from "@/lib/format";
 import { CourseCard } from "@/components/course-card";
 import { Reveal } from "@/components/reveal";
-import { Avatar } from "@/components/ui";
+import { Avatar, Thumbnail } from "@/components/ui";
 import {
   ArrowRightIcon,
   BookIcon,
@@ -37,13 +38,37 @@ const features = [
 ];
 
 export default async function HomePage() {
-  const [courses, channelStats, instructor] = await Promise.all([
+  const [courses, channelStats, instructor, sessionUser] = await Promise.all([
     getCourses(),
     getChannelStats(),
     getInstructorWithStats(),
+    getCurrentUser(),
   ]);
 
+  const userEnrollments = sessionUser ? await getUserEnrollments(sessionUser.id) : [];
   const popular = [...courses].sort((a, b) => b.views - a.views).slice(0, 6);
+
+  // Hero "Now playing" card: user's most-recently-enrolled course with progress,
+  // falling back to the most-viewed published course.
+  const byViews = [...courses].sort((a, b) => b.views - a.views);
+  let heroCourse = byViews[0];
+  let heroProgress = 0;
+  let heroHref = heroCourse ? `/courses/${heroCourse.slug}` : "/courses";
+
+  if (userEnrollments.length > 0) {
+    const latest = [...userEnrollments].sort(
+      (a, b) => new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime(),
+    )[0];
+    const found = courses.find((c) => c.id === latest.courseId);
+    if (found) {
+      heroCourse = found;
+      const total = found.modules.flatMap((m) => m.lessons).length;
+      heroProgress = total
+        ? Math.round((latest.completedLessonIds.length / total) * 100)
+        : 0;
+      heroHref = heroProgress > 0 ? `/learn/${found.slug}` : `/courses/${found.slug}`;
+    }
+  }
 
   const stats = [
     { value: `${formatCompact(channelStats.subscribers)}+`, label: "Subscribers" },
@@ -87,33 +112,48 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Product preview */}
-          <div
-            className="reveal card overflow-hidden"
-            style={{ animationDelay: "240ms" }}
-          >
-            <div className="thumb relative flex aspect-[16/10] items-center justify-center">
-              <span className="pointer-events-none absolute -right-3 -top-4 select-none font-mono text-[6rem] font-bold leading-none text-on-panel/10">
-                NISM
-              </span>
-              <span className="grid h-14 w-14 place-items-center rounded-full bg-white/10 text-on-panel ring-1 ring-white/15">
-                <PlayCircleIcon width={30} height={30} />
-              </span>
-              <span className="absolute left-4 top-4 tag border-white/15 bg-white/10 text-on-panel">
-                Now playing
-              </span>
-            </div>
-            <div className="p-5">
-              <p className="font-semibold text-ink">NISM VA · Mutual Fund Distributors</p>
-              <p className="mt-0.5 text-sm text-muted">Tech Courses · Certification</p>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="h-1 flex-1 overflow-hidden rounded-full bg-surface-2">
-                  <div className="h-full w-2/3 rounded-full bg-accent" />
+          {/* Product preview — user-specific or most popular course */}
+          {heroCourse && (
+            <Link
+              href={heroHref}
+              className="reveal card overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-line-strong hover:shadow-md"
+              style={{ animationDelay: "240ms" }}
+            >
+              <Thumbnail
+                src={heroCourse.thumbnail || undefined}
+                watermark={heroCourse.code ?? heroCourse.level.slice(0, 3)}
+                className="aspect-[16/10]"
+                sizes="(min-width: 768px) 45vw, 100vw"
+              >
+                <div className="absolute inset-0 bg-ink-panel/30" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="grid h-14 w-14 place-items-center rounded-full bg-white/10 text-on-panel ring-1 ring-white/15">
+                    <PlayCircleIcon width={30} height={30} />
+                  </span>
                 </div>
-                <span className="tnum text-xs text-muted">66%</span>
+                <span className="absolute left-4 top-4 tag border-white/15 bg-white/10 text-on-panel">
+                  {heroProgress > 0 ? "Continue" : "Now playing"}
+                </span>
+              </Thumbnail>
+              <div className="p-5">
+                <p className="truncate font-semibold text-ink">{heroCourse.title}</p>
+                <p className="mt-0.5 text-sm text-muted">
+                  {heroCourse.level} · {formatCompact(heroCourse.views)} views
+                </p>
+                {sessionUser && (
+                  <div className="mt-4 flex items-center gap-3">
+                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-surface-2">
+                      <div
+                        className="h-full rounded-full bg-accent"
+                        style={{ width: `${heroProgress}%` }}
+                      />
+                    </div>
+                    <span className="tnum text-xs text-muted">{heroProgress}%</span>
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
+            </Link>
+          )}
         </div>
 
         {/* Stat strip */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { Course, Lesson } from "@/lib/types";
@@ -129,14 +130,26 @@ export function LessonPlayer({ course }: { course: Course }) {
           <div className="bg-black">
             <div className="mx-auto aspect-video w-full max-w-6xl">
               {locked ? (
-                <div className="thumb flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-                  <LockIcon width={34} height={34} className="text-on-panel-soft" />
-                  <p className="text-lg font-semibold text-on-panel">This lesson is locked</p>
-                  <p className="max-w-sm text-sm text-on-panel-soft">
+                <div className="thumb relative flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                  {current?.lesson.thumbnail && (
+                    <>
+                      <Image
+                        src={current.lesson.thumbnail}
+                        alt=""
+                        fill
+                        className="object-cover opacity-25"
+                        sizes="100vw"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-ink-panel/60" />
+                    </>
+                  )}
+                  <LockIcon width={34} height={34} className="relative text-on-panel-soft" />
+                  <p className="relative text-lg font-semibold text-on-panel">This lesson is locked</p>
+                  <p className="relative max-w-sm text-sm text-on-panel-soft">
                     Enrol free to unlock all <span className="tnum">{stats.lessonCount}</span>{" "}
                     lessons in this course.
                   </p>
-                  <button onClick={() => enroll(course.id)} className="btn btn-primary mt-2">
+                  <button onClick={() => enroll(course.id)} className="btn btn-primary relative mt-2">
                     Enrol free to unlock
                   </button>
                 </div>

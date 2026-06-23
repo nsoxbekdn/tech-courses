@@ -82,6 +82,8 @@ export function DashboardClient({ courses }: { courses: Course[] }) {
                   <div key={course.id} className="card flex gap-4 overflow-hidden p-4">
                     <Thumbnail
                       watermark={code}
+                      src={course.thumbnail || undefined}
+                      sizes="176px"
                       className="hidden h-28 w-44 shrink-0 rounded-[var(--radius)] sm:block"
                     >
                       <div className="absolute inset-0 flex items-center justify-center">

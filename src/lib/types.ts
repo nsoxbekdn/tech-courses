@@ -22,6 +22,7 @@ export interface Lesson {
   title: string;
   /** YouTube video id used by the lesson player embed. */
   youtubeId: string;
+  thumbnail: string;
   durationMinutes: number;
   /** Real view count for this video. */
   views: number;
