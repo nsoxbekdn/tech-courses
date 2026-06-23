@@ -149,7 +149,18 @@ export const getInstructorWithStats = cache(async () => {
   return { ...INSTRUCTOR, students: stats.subscribers, coursesCount: stats.courseCount };
 });
 
-// ── Course Studio (admin): raw rows incl. unpublished, with lesson counts ──
+// ── Course Studio (admin): raw rows incl. unpublished, with lessons ──
+
+export interface AdminLessonRow {
+  id: string;
+  ytVideoId: string;
+  title: string;
+  titleOverride: string | null;
+  seconds: number;
+  views: number;
+  position: number;
+  manuallyAdded: boolean;
+}
 
 export interface AdminCourseRow {
   id: string;
@@ -168,12 +179,13 @@ export interface AdminCourseRow {
   examInfo: string | null;
   mockTestUrl: string | null;
   syncedAt: string;
+  lessons: AdminLessonRow[];
 }
 
 export async function getAdminCourses(): Promise<AdminCourseRow[]> {
   const rows = await prisma.course.findMany({
     orderBy: [{ published: "desc" }, { order: "asc" }, { ytTitle: "asc" }],
-    include: { _count: { select: { lessons: true } } },
+    include: { lessons: { orderBy: { position: "asc" } } },
   });
   return rows.map((r) => ({
     id: r.id,
@@ -186,11 +198,21 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
     code: r.code,
     order: r.order,
     views: r.views,
-    lessonCount: r._count.lessons,
+    lessonCount: r.lessons.length,
     titleOverride: r.titleOverride,
     descOverride: r.descOverride,
     examInfo: r.examInfo,
     mockTestUrl: r.mockTestUrl,
     syncedAt: fmtDate(r.syncedAt),
+    lessons: r.lessons.map((l) => ({
+      id: l.id,
+      ytVideoId: l.ytVideoId,
+      title: l.title,
+      titleOverride: l.titleOverride,
+      seconds: l.seconds,
+      views: l.views,
+      position: l.position,
+      manuallyAdded: l.manuallyAdded,
+    })),
   }));
 }

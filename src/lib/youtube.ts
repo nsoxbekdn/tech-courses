@@ -103,6 +103,24 @@ export async function getPlaylists(channelId: string): Promise<PlaylistInfo[]> {
   return out;
 }
 
+export async function getVideoById(videoId: string): Promise<VideoInfo | null> {
+  const data = await api<{ items?: any[] }>("/videos", {
+    part: "snippet,contentDetails,statistics",
+    id: videoId,
+  });
+  const v = data.items?.[0];
+  if (!v) return null;
+  return {
+    videoId: v.id,
+    title: v.snippet.title,
+    description: v.snippet.description ?? "",
+    thumbnail: bestThumb(v.snippet.thumbnails),
+    seconds: isoToSeconds(v.contentDetails.duration),
+    views: Number(v.statistics?.viewCount ?? 0),
+    position: 9999,
+  };
+}
+
 // Returns the ordered videos of a playlist, with durations and view counts resolved.
 export async function getPlaylistVideos(playlistId: string): Promise<VideoInfo[]> {
   const raw: Omit<VideoInfo, "seconds" | "views">[] = [];

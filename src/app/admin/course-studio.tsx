@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatCompact } from "@/lib/format";
-import type { AdminCourseRow } from "@/lib/catalog";
+import type { AdminCourseRow, AdminLessonRow } from "@/lib/catalog";
 import {
   updateCourseAction,
   syncNowAction,
   addAdminAction,
   removeAdminAction,
+  updateLessonAction,
+  addLessonAction,
+  removeLessonAction,
   type CoursePatch,
 } from "@/lib/admin-actions";
 
@@ -24,23 +28,49 @@ const TRACKS = [
   { value: "OTHER", label: "Other (hidden)" },
 ];
 
-// Hoverable / focusable info tooltip.
+function fmtDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m >= 60) return `${Math.floor(m / 60)}h ${m % 60}m`;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+// Portal-based tooltip — escapes any overflow:hidden ancestor.
 function InfoTip({ text }: { text: string }) {
+  const [tooltip, setTooltip] = useState<{ top: number; left: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  function show() {
+    if (!btnRef.current) return;
+    const r = btnRef.current.getBoundingClientRect();
+    setTooltip({ top: r.top + window.scrollY, left: r.left + r.width / 2 + window.scrollX });
+  }
+
   return (
-    <span className="group relative inline-flex align-middle">
+    <span className="relative inline-flex align-middle">
       <button
+        ref={btnRef}
         type="button"
         aria-label="More info"
         className="grid h-4 w-4 cursor-help place-items-center rounded-full border border-line-strong text-[10px] font-bold leading-none text-muted transition-colors hover:border-accent hover:text-accent"
+        onMouseEnter={show}
+        onMouseLeave={() => setTooltip(null)}
+        onFocus={show}
+        onBlur={() => setTooltip(null)}
       >
         i
       </button>
-      <span
-        role="tooltip"
-        className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-60 -translate-x-1/2 rounded-[var(--radius)] border border-line bg-ink-panel px-3 py-2 text-left text-xs font-normal normal-case leading-relaxed tracking-normal text-on-panel opacity-0 shadow-pop transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
-      >
-        {text}
-      </span>
+      {tooltip &&
+        createPortal(
+          <span
+            role="tooltip"
+            style={{ position: "absolute", top: tooltip.top - 8, left: tooltip.left, transform: "translate(-50%, -100%)" }}
+            className="pointer-events-none z-[9999] w-60 rounded-[var(--radius)] border border-line bg-ink-panel px-3 py-2 text-left text-xs font-normal normal-case leading-relaxed tracking-normal text-on-panel shadow-pop"
+          >
+            {text}
+          </span>,
+          document.body,
+        )}
     </span>
   );
 }
@@ -125,13 +155,12 @@ export function CourseStudio({
           ))}
         </div>
 
-        <div className="card mt-10 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-line px-6 py-4">
+        <div className="card mt-10">
+          <div className="flex items-center justify-between rounded-t-[var(--radius-lg)] border-b border-line px-6 py-4">
             <h2 className="font-bold text-ink">All playlists ({courses.length})</h2>
             <p className="text-xs text-muted">Changes go live instantly.</p>
           </div>
 
-          {/* Column legend — explains each control once */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line bg-surface-2 px-6 py-3 text-xs font-medium text-ink-soft">
             <span className="inline-flex items-center gap-1.5">
               Publish
@@ -158,7 +187,6 @@ export function CourseStudio({
           </div>
         </div>
 
-        {/* Team access */}
         <TeamAccess admins={admins} currentEmail={currentEmail} />
       </section>
     </>
@@ -192,8 +220,8 @@ function TeamAccess({ admins, currentEmail }: { admins: AdminEntry[]; currentEma
   }
 
   return (
-    <div className="card mt-10 overflow-hidden">
-      <div className="flex items-center gap-2 border-b border-line px-6 py-4">
+    <div className="card mt-10">
+      <div className="flex items-center gap-2 rounded-t-[var(--radius-lg)] border-b border-line px-6 py-4">
         <h2 className="font-bold text-ink">Team access</h2>
         <InfoTip text="People listed here can open Course Studio and manage courses. Add a teammate by their email — they get access the moment they sign in with it. 'Owner' admins are set in configuration and can't be removed here." />
       </div>
@@ -247,7 +275,8 @@ function CourseRow({ course }: { course: AdminCourseRow }) {
   const [published, setPublished] = useState(course.published);
   const [track, setTrack] = useState(course.track);
   const [order, setOrder] = useState(String(course.order));
-  const [expanded, setExpanded] = useState(false);
+  const [showCopy, setShowCopy] = useState(false);
+  const [showVideos, setShowVideos] = useState(false);
   const [titleOverride, setTitleOverride] = useState(course.titleOverride ?? "");
   const [descOverride, setDescOverride] = useState(course.descOverride ?? "");
   const [examInfo, setExamInfo] = useState(course.examInfo ?? "");
@@ -286,7 +315,7 @@ function CourseRow({ course }: { course: AdminCourseRow }) {
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-ink">{titleOverride || course.ytTitle}</p>
           <p className="tnum text-xs text-muted">
-            {course.lessonCount} lessons · {formatCompact(course.views)} views
+            {course.lessonCount} videos · {formatCompact(course.views)} views
             {course.published && (
               <>
                 {" · "}
@@ -316,26 +345,33 @@ function CourseRow({ course }: { course: AdminCourseRow }) {
         </select>
 
         {/* Order */}
-        <input
-          type="number"
-          value={order}
-          onChange={(e) => setOrder(e.target.value)}
-          onBlur={() => save({ order: Number(order) || 0 })}
-          className="field w-20 tnum"
-          aria-label="Order"
-          title="Lower numbers show first"
-        />
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            onBlur={() => save({ order: Number(order) || 0 })}
+            className="field w-20 tnum"
+            aria-label="Sort order"
+            title="Lower numbers appear first on the site"
+          />
+          <InfoTip text="Sort position — lower numbers appear first on the site. Use this to put your most important courses at the top." />
+        </div>
 
-        <button
-          onClick={() => setExpanded((x) => !x)}
-          className="btn btn-ghost text-sm"
-        >
-          {expanded ? "Close" : "Edit copy"}
+        <button onClick={() => setShowVideos((x) => !x)} className="btn btn-ghost text-sm">
+          {showVideos ? "Hide videos" : `Videos (${course.lessonCount})`}
+        </button>
+        <button onClick={() => setShowCopy((x) => !x)} className="btn btn-ghost text-sm">
+          {showCopy ? "Close" : "Edit copy"}
         </button>
         {saved && <span className="text-xs text-accent">Saved</span>}
       </div>
 
-      {expanded && (
+      {showVideos && (
+        <VideoList courseId={course.id} lessons={course.lessons} onRefresh={() => router.refresh()} />
+      )}
+
+      {showCopy && (
         <div className="mt-4 grid gap-3 rounded-[var(--radius)] border border-line bg-surface-2 p-4">
           <div>
             <label className="mb-1 block text-xs font-medium text-ink-soft">
@@ -350,9 +386,7 @@ function CourseRow({ course }: { course: AdminCourseRow }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-ink-soft">
-              Description override
-            </label>
+            <label className="mb-1 block text-xs font-medium text-ink-soft">Description override</label>
             <textarea
               className="field min-h-20"
               value={descOverride}
@@ -387,6 +421,141 @@ function CourseRow({ course }: { course: AdminCourseRow }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function VideoList({
+  courseId,
+  lessons,
+  onRefresh,
+}: {
+  courseId: string;
+  lessons: AdminLessonRow[];
+  onRefresh: () => void;
+}) {
+  const [addInput, setAddInput] = useState("");
+  const [addMsg, setAddMsg] = useState("");
+  const [adding, startAdding] = useTransition();
+
+  function doAdd() {
+    setAddMsg("");
+    startAdding(async () => {
+      const res = await addLessonAction(courseId, addInput.trim());
+      if (res.ok) {
+        setAddInput("");
+        onRefresh();
+      } else {
+        setAddMsg(res.error || "Could not add video.");
+      }
+    });
+  }
+
+  return (
+    <div className="mt-4 rounded-[var(--radius)] border border-line bg-surface-2">
+      {/* Header */}
+      <div className="grid grid-cols-[2rem_1fr_5rem_5rem_5rem] gap-2 border-b border-line px-4 py-2 text-xs font-medium text-ink-soft">
+        <span>#</span>
+        <span>Title</span>
+        <span className="text-right">Duration</span>
+        <span className="text-right">Views</span>
+        <span />
+      </div>
+
+      {lessons.length === 0 && (
+        <p className="px-4 py-6 text-center text-sm text-muted">No videos yet. Add one below.</p>
+      )}
+
+      <div className="divide-y divide-line">
+        {lessons.map((lesson) => (
+          <VideoRow key={lesson.id} lesson={lesson} onRefresh={onRefresh} />
+        ))}
+      </div>
+
+      {/* Add video */}
+      <div className="flex flex-wrap items-end gap-3 border-t border-line p-4">
+        <div className="flex-1">
+          <label className="mb-1 block text-xs font-medium text-ink-soft">
+            Add a video — paste a YouTube URL or video ID
+          </label>
+          <input
+            className="field"
+            value={addInput}
+            onChange={(e) => setAddInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addInput.trim() && doAdd()}
+            placeholder="https://youtube.com/watch?v=… or dQw4w9WgXcQ"
+          />
+        </div>
+        <button onClick={doAdd} disabled={adding || !addInput.trim()} className="btn btn-primary">
+          {adding ? "Adding…" : "Add video"}
+        </button>
+      </div>
+      {addMsg && <p className="px-4 pb-4 text-xs text-danger">{addMsg}</p>}
+    </div>
+  );
+}
+
+function VideoRow({ lesson, onRefresh }: { lesson: AdminLessonRow; onRefresh: () => void }) {
+  const [title, setTitle] = useState(lesson.titleOverride ?? lesson.title);
+  const [position, setPosition] = useState(String(lesson.position));
+  const [, startSave] = useTransition();
+  const [, startRemove] = useTransition();
+
+  function saveTitle() {
+    const override = title.trim() === lesson.title ? null : title.trim() || null;
+    startSave(async () => {
+      await updateLessonAction(lesson.id, { titleOverride: override });
+      onRefresh();
+    });
+  }
+
+  function savePosition() {
+    startSave(async () => {
+      await updateLessonAction(lesson.id, { position: Number(position) || 0 });
+      onRefresh();
+    });
+  }
+
+  function remove() {
+    startRemove(async () => {
+      await removeLessonAction(lesson.id);
+      onRefresh();
+    });
+  }
+
+  return (
+    <div className="grid grid-cols-[2rem_1fr_5rem_5rem_5rem] items-center gap-2 px-4 py-2 text-sm">
+      <input
+        type="number"
+        value={position}
+        onChange={(e) => setPosition(e.target.value)}
+        onBlur={savePosition}
+        className="field w-full tnum px-1 py-0.5 text-xs"
+        aria-label="Position"
+      />
+      <div className="min-w-0">
+        <input
+          className="field w-full py-0.5 text-xs"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={saveTitle}
+          title={lesson.title}
+        />
+        {lesson.manuallyAdded && (
+          <span className="mt-0.5 block text-[10px] text-accent">manually added</span>
+        )}
+      </div>
+      <p className="tnum text-right text-xs text-muted">{fmtDuration(lesson.seconds)}</p>
+      <p className="tnum text-right text-xs text-muted">{formatCompact(lesson.views)}</p>
+      <div className="flex justify-end">
+        <button
+          onClick={remove}
+          className="text-xs text-danger hover:underline"
+          title="Remove from this playlist"
+        >
+          Remove
+        </button>
+      </div>
     </div>
   );
 }

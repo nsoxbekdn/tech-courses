@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "./prisma";
 import { getAdminUser, isBootstrapAdmin } from "./admin";
 import { runSync } from "./sync";
+import { getVideoById } from "./youtube";
 
 export interface CoursePatch {
   published?: boolean;
@@ -57,6 +58,72 @@ export async function removeAdminAction(email: string) {
   email = email.trim().toLowerCase();
   if (isBootstrapAdmin(email)) return { ok: false, error: "Owner admins can't be removed here." };
   await prisma.admin.deleteMany({ where: { email } });
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+// ── Lesson management ──
+
+export interface LessonPatch {
+  titleOverride?: string | null;
+  position?: number;
+}
+
+export async function updateLessonAction(id: string, patch: LessonPatch) {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "Not authorized" };
+  await prisma.lesson.update({ where: { id }, data: patch });
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+function extractVideoId(input: string): string | null {
+  input = input.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+  try {
+    const url = new URL(input);
+    if (url.hostname.includes("youtube.com")) return url.searchParams.get("v");
+    if (url.hostname === "youtu.be") return url.pathname.slice(1).split("?")[0] || null;
+  } catch {}
+  return null;
+}
+
+export async function addLessonAction(courseId: string, youtubeInput: string) {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "Not authorized" };
+
+  const videoId = extractVideoId(youtubeInput);
+  if (!videoId) return { ok: false, error: "Could not extract a YouTube video ID from that input." };
+
+  const existing = await prisma.lesson.findUnique({ where: { id: `${courseId}_${videoId}` } });
+  if (existing) return { ok: false, error: "That video is already in this playlist." };
+
+  const video = await getVideoById(videoId);
+  if (!video) return { ok: false, error: "Video not found on YouTube." };
+
+  const maxPos = await prisma.lesson.aggregate({ where: { courseId }, _max: { position: true } });
+  const position = (maxPos._max.position ?? 0) + 1;
+
+  await prisma.lesson.create({
+    data: {
+      id: `${courseId}_${videoId}`,
+      courseId,
+      ytVideoId: videoId,
+      title: video.title,
+      seconds: video.seconds,
+      views: video.views,
+      position,
+      manuallyAdded: true,
+    },
+  });
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function removeLessonAction(id: string) {
+  const admin = await getAdminUser();
+  if (!admin) return { ok: false, error: "Not authorized" };
+  await prisma.lesson.delete({ where: { id } });
   revalidatePath("/", "layout");
   return { ok: true };
 }

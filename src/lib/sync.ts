@@ -132,9 +132,9 @@ export async function runSync(): Promise<SyncResult> {
       });
       lessonCount++;
     }
-    // Drop lessons removed from the playlist.
+    // Drop lessons removed from the playlist (keep manually-added ones).
     await prisma.lesson.deleteMany({
-      where: { courseId: pl.id, id: { notIn: [...keep] } },
+      where: { courseId: pl.id, id: { notIn: [...keep] }, manuallyAdded: false },
     });
   }
 
