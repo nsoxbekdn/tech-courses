@@ -16,7 +16,7 @@ export function CourseCard({ course }: { course: Course }) {
       href={`/courses/${course.slug}`}
       className="card group flex flex-col overflow-hidden transition-[transform,border-color,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:border-line-strong hover:shadow-md"
     >
-      <Thumbnail watermark={code} className="aspect-[16/9]">
+      <Thumbnail watermark={code} src={course.thumbnail || undefined} className="aspect-[16/9]">
         {/* Scrim guarantees title legibility over the grid + watermark */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-ink-panel via-ink-panel/55 to-transparent" />
         <div className="absolute left-3 top-3 flex gap-1.5">

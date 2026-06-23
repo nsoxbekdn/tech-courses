@@ -52,8 +52,8 @@ export interface Course {
   views: number;
   lastUpdated: string;
   language: string;
-  /** Two CSS color stops for the course thumbnail gradient (unused by .thumb panel). */
-  thumbnail: [string, string];
+  /** YouTube playlist thumbnail URL (empty string = no thumbnail yet). */
+  thumbnail: string;
   tags: string[];
   whatYouLearn: string[];
   requirements: string[];

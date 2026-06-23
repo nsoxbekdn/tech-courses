@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { StarIcon, PlayCircleIcon } from "./icons";
 import { formatCompact } from "@/lib/format";
 
@@ -73,24 +74,40 @@ export function LevelBadge({ level }: { level: string }) {
 }
 
 /**
- * Graph-paper ink panel used for course/lesson thumbnails — a consistent,
- * branded surface (accounting ledger nod) rather than per-item gradients.
+ * Graph-paper ink panel used for course/lesson thumbnails.
+ * When `src` is provided the YouTube thumbnail fills the panel;
+ * otherwise the graph-paper dark background shows as the fallback.
  */
 export function Thumbnail({
   className = "",
   watermark,
+  src,
+  sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
   children,
 }: {
   className?: string;
   watermark?: string;
+  src?: string;
+  sizes?: string;
   children?: React.ReactNode;
 }) {
   return (
     <div className={`thumb ${className}`}>
-      {watermark && (
-        <span className="pointer-events-none absolute -right-2 -top-3 select-none font-mono text-[5.5rem] font-bold leading-none text-on-panel/10">
-          {watermark}
-        </span>
+      {src ? (
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes={sizes}
+          className="object-cover"
+          priority={false}
+        />
+      ) : (
+        watermark && (
+          <span className="pointer-events-none absolute -right-2 -top-3 select-none font-mono text-[5.5rem] font-bold leading-none text-on-panel/10">
+            {watermark}
+          </span>
+        )
       )}
       {children}
     </div>

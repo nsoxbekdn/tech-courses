@@ -454,8 +454,9 @@ function VideoList({
   return (
     <div className="mt-4 rounded-[var(--radius)] border border-line bg-surface-2">
       {/* Header */}
-      <div className="grid grid-cols-[2rem_1fr_5rem_5rem_5rem] gap-2 border-b border-line px-4 py-2 text-xs font-medium text-ink-soft">
+      <div className="grid grid-cols-[2rem_3rem_1fr_5rem_5rem_5rem] gap-2 border-b border-line px-4 py-2 text-xs font-medium text-ink-soft">
         <span>#</span>
+        <span />
         <span>Title</span>
         <span className="text-right">Duration</span>
         <span className="text-right">Views</span>
@@ -524,7 +525,7 @@ function VideoRow({ lesson, onRefresh }: { lesson: AdminLessonRow; onRefresh: ()
   }
 
   return (
-    <div className="grid grid-cols-[2rem_1fr_5rem_5rem_5rem] items-center gap-2 px-4 py-2 text-sm">
+    <div className="grid grid-cols-[2rem_3rem_1fr_5rem_5rem_5rem] items-center gap-2 px-4 py-2 text-sm">
       <input
         type="number"
         value={position}
@@ -533,6 +534,15 @@ function VideoRow({ lesson, onRefresh }: { lesson: AdminLessonRow; onRefresh: ()
         className="field w-full tnum px-1 py-0.5 text-xs"
         aria-label="Position"
       />
+      {lesson.thumbnail ? (
+        <img
+          src={lesson.thumbnail}
+          alt=""
+          className="h-8 w-12 rounded object-cover"
+        />
+      ) : (
+        <div className="h-8 w-12 rounded bg-surface-2" />
+      )}
       <div className="min-w-0">
         <input
           className="field w-full py-0.5 text-xs"

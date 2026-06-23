@@ -61,7 +61,7 @@ export function EnrollPanel({ course }: { course: Course }) {
 
   return (
     <div className="card overflow-hidden">
-      <Thumbnail watermark={code} className="aspect-video">
+      <Thumbnail watermark={code} src={course.thumbnail || undefined} className="aspect-video" sizes="(min-width: 1024px) 400px, 100vw">
         <div className="absolute inset-0 flex items-center justify-center">
           {previewLesson ? (
             <Link

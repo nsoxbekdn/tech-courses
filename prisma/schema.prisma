@@ -94,6 +94,7 @@ model Lesson {
   ytVideoId     String
   title         String
   titleOverride String?  // admin-set; preserved across syncs
+  thumbnail     String  @default("")
   seconds       Int     @default(0)
   views         Int     @default(0)
   position      Int     @default(0)

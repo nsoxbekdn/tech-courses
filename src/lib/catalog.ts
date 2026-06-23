@@ -79,7 +79,7 @@ function buildCourse(c: NonNullable<DbCourse>): Course {
     views: c.views,
     lastUpdated: fmtDate(c.syncedAt),
     language: "English",
-    thumbnail: ["#1f2937", "#0f172a"],
+    thumbnail: c.thumbnail,
     tags: [level, c.code, "English"].filter(Boolean) as string[],
     whatYouLearn: lessons.slice(0, 6).map((l) => l.title),
     requirements,
@@ -156,6 +156,7 @@ export interface AdminLessonRow {
   ytVideoId: string;
   title: string;
   titleOverride: string | null;
+  thumbnail: string;
   seconds: number;
   views: number;
   position: number;
@@ -209,6 +210,7 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
       ytVideoId: l.ytVideoId,
       title: l.title,
       titleOverride: l.titleOverride,
+      thumbnail: l.thumbnail,
       seconds: l.seconds,
       views: l.views,
       position: l.position,

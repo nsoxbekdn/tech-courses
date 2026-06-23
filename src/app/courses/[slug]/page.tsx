@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCourseBySlug, getInstructorWithStats, getEnrolledCount } from "@/lib/catalog";
@@ -48,6 +49,19 @@ export default async function CourseDetailPage({
     <>
       {/* Hero */}
       <section className="thumb bg-ink-panel text-on-panel">
+        {course.thumbnail && (
+          <>
+            <Image
+              src={course.thumbnail}
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-cover opacity-20"
+              priority
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink-panel via-ink-panel/80 to-ink-panel/40" />
+          </>
+        )}
         <div className="container-page grid gap-8 py-12 lg:grid-cols-[1.6fr_1fr]">
           <div>
             <nav className="flex items-center gap-2 text-sm text-on-panel-soft">

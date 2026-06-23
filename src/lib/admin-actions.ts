@@ -110,6 +110,7 @@ export async function addLessonAction(courseId: string, youtubeInput: string) {
       courseId,
       ytVideoId: videoId,
       title: video.title,
+      thumbnail: video.thumbnail,
       seconds: video.seconds,
       views: video.views,
       position,
