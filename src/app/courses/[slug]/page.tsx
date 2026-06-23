@@ -48,7 +48,7 @@ export default async function CourseDetailPage({
   return (
     <>
       {/* Hero */}
-      <section className="thumb bg-ink-panel text-on-panel">
+      <section className="thumb bg-ink-panel text-white">
         {course.thumbnail && (
           <>
             <Image
@@ -65,14 +65,9 @@ export default async function CourseDetailPage({
         <div className="container-page grid gap-8 py-12 lg:grid-cols-[1.6fr_1fr]">
           <div>
             <nav className="flex items-center gap-2 text-sm font-medium text-white">
-              <Link href="/courses" className="opacity-70 transition-opacity hover:opacity-100">
-                Courses
-              </Link>
-              <span className="opacity-50">/</span>
-              <Link
-                href={`/courses?level=${course.level}`}
-                className="opacity-70 transition-opacity hover:opacity-100"
-              >
+              <Link href="/courses" className="hover:underline">Courses</Link>
+              <span>/</span>
+              <Link href={`/courses?level=${course.level}`} className="hover:underline">
                 {course.level}
               </Link>
             </nav>
@@ -118,12 +113,12 @@ export default async function CourseDetailPage({
               <div className="mt-5 flex items-center gap-3">
                 <Avatar initials={instructor.initials} size={40} onPanel />
                 <div className="text-sm">
-                  <p className="text-white opacity-70">Created by</p>
+                  <p className="text-white">Created by</p>
                   <p className="font-semibold text-white">{instructor.name}</p>
                 </div>
               </div>
             )}
-            <p className="mt-4 text-xs text-white opacity-60">
+            <p className="mt-4 text-xs text-white">
               Last updated {course.lastUpdated}
             </p>
           </div>
