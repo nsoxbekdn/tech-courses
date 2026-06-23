@@ -56,15 +56,15 @@ export default async function CourseDetailPage({
               alt=""
               fill
               sizes="100vw"
-              className="object-cover opacity-40"
+              className="object-cover opacity-50 blur-sm scale-105"
               priority
             />
-            <div className="pointer-events-none absolute inset-0 bg-ink-panel/55" />
+            <div className="pointer-events-none absolute inset-0 bg-ink-panel/60" />
           </>
         )}
         <div className="container-page grid gap-8 py-12 lg:grid-cols-[1.6fr_1fr]">
           <div>
-            <nav className="flex items-center gap-2 text-sm text-on-panel-soft">
+            <nav className="flex items-center gap-2 text-sm text-on-panel/70">
               <Link href="/courses" className="transition-colors hover:text-on-panel">
                 Courses
               </Link>
@@ -78,11 +78,11 @@ export default async function CourseDetailPage({
             </nav>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="tag border-white/15 bg-white/10 text-on-panel">
+              <span className="tag border-white/20 bg-white/15 text-on-panel">
                 {course.level}
               </span>
               {course.code && (
-                <span className="tag border-white/15 bg-white/10 text-on-panel-soft">
+                <span className="tag border-white/15 bg-white/10 text-on-panel">
                   {course.code}
                 </span>
               )}
@@ -91,23 +91,23 @@ export default async function CourseDetailPage({
             <h1 className="mt-4 text-3xl font-bold leading-tight tracking-tight md:text-4xl">
               {course.title}
             </h1>
-            <p className="mt-3 max-w-2xl text-lg text-on-panel-soft">{course.subtitle}</p>
+            <p className="mt-3 max-w-2xl text-lg text-on-panel/85">{course.subtitle}</p>
 
-            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-              <span className="tnum inline-flex items-center gap-1 text-on-panel-soft">
+            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-on-panel/75">
+              <span className="tnum inline-flex items-center gap-1.5">
                 <PlayCircleIcon width={15} height={15} />
                 {formatCompact(course.views)} views
               </span>
-              <span className="tnum inline-flex items-center gap-1 text-on-panel-soft">
+              <span className="tnum inline-flex items-center gap-1.5">
                 <ClockIcon width={15} height={15} />
                 {stats.totalHours} hours total
               </span>
-              <span className="inline-flex items-center gap-1 text-on-panel-soft">
+              <span className="inline-flex items-center gap-1.5">
                 <GlobeIcon width={15} height={15} />
                 {course.language}
               </span>
               {enrolledCount >= 10 && (
-                <span className="tnum inline-flex items-center gap-1 text-on-panel-soft">
+                <span className="tnum inline-flex items-center gap-1.5">
                   <UsersIcon width={15} height={15} />
                   {formatCompact(enrolledCount)} enrolled
                 </span>
