@@ -48,13 +48,21 @@ export function Reveal({
       // so the two easings don't fight (the .reveal-* classes declare one).
       targets.forEach((t) => (t.style.transition = "none"));
 
-      animate(targets, {
-        opacity: [0, 1],
-        translateY: [y, 0],
-        duration: 620,
-        delay: doStagger ? stagger(70) : 0,
-        ease: EASE.outExpo,
-      });
+      try {
+        animate(targets, {
+          opacity: [0, 1],
+          translateY: [y, 0],
+          duration: 620,
+          delay: doStagger ? stagger(70) : 0,
+          ease: EASE.outExpo,
+        });
+      } catch {
+        // Never leave content stuck at opacity:0 if the engine ever fails.
+        targets.forEach((t) => {
+          t.style.opacity = "1";
+          t.style.transform = "none";
+        });
+      }
     };
 
     return onInView(el, reveal);

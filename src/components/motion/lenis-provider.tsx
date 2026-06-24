@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { reduceMotion } from "@/lib/motion";
 
@@ -19,8 +20,14 @@ declare global {
 }
 
 export function LenisProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   useEffect(() => {
-    if (reduceMotion()) return;
+    // The lesson player (/learn) is a focused surface built around an
+    // interactive YouTube <iframe>; Lenis disables iframe pointer-events while
+    // smooth, so we leave that route on native scroll. Destroying Lenis here
+    // also strips its <html> classes, so the iframe rule never applies.
+    if (reduceMotion() || pathname?.startsWith("/learn/")) return;
 
     const lenis = new Lenis({
       duration: 1.05,
@@ -64,7 +71,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       lenis.destroy();
       delete window.__lenis;
     };
-  }, []);
+  }, [pathname]);
 
   return <>{children}</>;
 }
