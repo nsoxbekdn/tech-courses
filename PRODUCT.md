@@ -22,7 +22,7 @@ Precise, composed, credible. The voice of a good examiner: exact, calm, never hy
 ## Design Principles
 1. **Precision over decoration.** Hairlines, tabular figures, exact alignment. Every rule and number is deliberate, like a balance sheet that ties.
 2. **Earn trust by restraint.** Calm surfaces and accurate copy signal a serious institution; we don't shout discounts.
-3. **One confident accent.** A single deep green carries the brand; the rest is ink on paper. Color is a signal, not wallpaper.
+3. **One confident accent.** A single shining silver carries the brand; the rest is ink on black. The accent is a signal, not wallpaper.
 4. **Readable for the long haul.** Built for hours of study: high contrast, generous measure, no eye strain.
 5. **Sharp, not soft.** Tight radii and clean edges read as professional tooling, not a toy.
 

@@ -9,9 +9,9 @@ import { ThemeToggle } from "./theme-toggle";
 import { MenuIcon } from "./icons";
 
 const navLinks = [
-  { href: "/courses", label: "All courses" },
-  { href: "/courses?level=Certification", label: "Certifications" },
-  { href: "/courses?level=Coding", label: "Coding" },
+  { href: "/courses", label: "courses" },
+  { href: "/courses?level=Certification", label: "certifications" },
+  { href: "/courses?level=Coding", label: "coding" },
 ];
 
 /** Match a nav href against the live pathname + ?level= filter. */
@@ -22,34 +22,63 @@ function useIsActive() {
     const [path, query] = href.split("?");
     if (pathname !== path) return false;
     const hrefLevel = query ? new URLSearchParams(query).get("level") : null;
-    return hrefLevel === level; // "All courses" (no level) active only when unfiltered
+    return hrefLevel === level; // "courses" (no level) active only when unfiltered
   };
+}
+
+/** Bracketed terminal nav item: [ label_ ] with accent brackets + hover caret. */
+function NavItem({
+  href,
+  label,
+  active,
+  onClick,
+  block = false,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  onClick?: () => void;
+  block?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      aria-current={active ? "page" : undefined}
+      data-active={active}
+      className={`group font-mono text-sm transition-colors ${
+        block ? "block py-2.5" : "px-2.5 py-2"
+      } ${active ? "text-ink" : "text-ink-soft hover:text-ink"}`}
+    >
+      <span
+        className={`mr-0.5 transition-colors ${
+          active ? "text-accent" : "text-line-strong group-hover:text-accent"
+        }`}
+      >
+        [
+      </span>
+      {label}
+      <span className="text-accent opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+        _
+      </span>
+      <span
+        className={`ml-0.5 transition-colors ${
+          active ? "text-accent" : "text-line-strong group-hover:text-accent"
+        }`}
+      >
+        ]
+      </span>
+    </Link>
+  );
 }
 
 function DesktopNav() {
   const isActive = useIsActive();
   return (
-    <nav className="ml-2 hidden items-center gap-0.5 md:flex">
-      {navLinks.map((l) => {
-        const active = isActive(l.href);
-        return (
-          <Link
-            key={l.label}
-            href={l.href}
-            aria-current={active ? "page" : undefined}
-            className={`relative rounded-[var(--radius)] px-3 py-2 text-sm font-medium transition-colors ${
-              active
-                ? "text-ink"
-                : "text-ink-soft hover:bg-surface-2 hover:text-ink"
-            }`}
-          >
-            {l.label}
-            {active && (
-              <span className="absolute inset-x-3 -bottom-[9px] h-0.5 rounded-full bg-accent" />
-            )}
-          </Link>
-        );
-      })}
+    <nav className="ml-1 hidden items-center gap-1 md:flex">
+      {navLinks.map((l) => (
+        <NavItem key={l.label} href={l.href} label={l.label} active={isActive(l.href)} />
+      ))}
     </nav>
   );
 }
@@ -58,24 +87,16 @@ function MobileNav({ onNavigate }: { onNavigate: () => void }) {
   const isActive = useIsActive();
   return (
     <nav className="border-t border-line bg-surface px-4 py-2 md:hidden">
-      {navLinks.map((l) => {
-        const active = isActive(l.href);
-        return (
-          <Link
-            key={l.label}
-            href={l.href}
-            onClick={onNavigate}
-            aria-current={active ? "page" : undefined}
-            className={`block rounded-[var(--radius)] px-3 py-2.5 text-sm font-medium transition-colors ${
-              active
-                ? "bg-surface-2 text-ink"
-                : "text-ink-soft hover:bg-surface-2 hover:text-ink"
-            }`}
-          >
-            {l.label}
-          </Link>
-        );
-      })}
+      {navLinks.map((l) => (
+        <NavItem
+          key={l.label}
+          href={l.href}
+          label={l.label}
+          active={isActive(l.href)}
+          onClick={onNavigate}
+          block
+        />
+      ))}
     </nav>
   );
 }
@@ -83,11 +104,12 @@ function MobileNav({ onNavigate }: { onNavigate: () => void }) {
 function Wordmark() {
   return (
     <Link href="/" className="flex items-center gap-2.5">
-      <span className="grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] bg-accent font-mono text-sm font-bold text-accent-ink">
+      <span className="metal grid h-8 w-8 place-items-center rounded-[var(--radius-sm)] font-mono text-sm font-bold">
         TC
       </span>
-      <span className="text-[0.95rem] font-bold tracking-tight text-ink">
-        Tech Courses
+      <span className="font-mono text-[0.95rem] font-bold tracking-tight text-ink">
+        tech-courses
+        <span className="text-accent caret caret-bare" />
       </span>
     </Link>
   );
@@ -105,7 +127,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/80 backdrop-blur-md">
-      <div className="container-page flex h-16 items-center gap-6">
+      <div className="container-page flex h-16 items-center gap-5">
         <Wordmark />
 
         <Suspense fallback={<div className="ml-2 hidden md:block" />}>
@@ -120,7 +142,7 @@ export function SiteHeader() {
           ) : user ? (
             <>
               <Link href="/dashboard" className="btn btn-ghost hidden sm:inline-flex">
-                My learning
+                my learning
               </Link>
               <div className="relative">
                 <button
@@ -135,23 +157,23 @@ export function SiteHeader() {
                     <div className="fixed inset-0 z-10" onClick={() => setMenu(false)} />
                     <div className="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-[var(--radius-lg)] border border-line bg-surface shadow-pop">
                       <div className="border-b border-line px-4 py-3">
-                        <p className="font-semibold text-ink">{user.name}</p>
-                        <p className="truncate text-xs text-muted">{user.email}</p>
+                        <p className="font-mono text-sm font-semibold text-ink">{user.name}</p>
+                        <p className="truncate font-mono text-xs text-muted">{user.email}</p>
                       </div>
                       <Link
                         href="/dashboard"
                         onClick={() => setMenu(false)}
-                        className="block px-4 py-2.5 text-sm text-ink-soft hover:bg-surface-2 hover:text-ink"
+                        className="block px-4 py-2.5 font-mono text-sm text-ink-soft hover:bg-surface-2 hover:text-ink"
                       >
-                        My learning
+                        my learning
                       </Link>
                       {isAdmin && (
                         <Link
                           href="/admin"
                           onClick={() => setMenu(false)}
-                          className="block px-4 py-2.5 text-sm text-ink-soft hover:bg-surface-2 hover:text-ink"
+                          className="block px-4 py-2.5 font-mono text-sm text-ink-soft hover:bg-surface-2 hover:text-ink"
                         >
-                          Course Studio
+                          course studio
                         </Link>
                       )}
                       <button
@@ -160,9 +182,9 @@ export function SiteHeader() {
                           setMenu(false);
                           router.push("/");
                         }}
-                        className="block w-full border-t border-line px-4 py-2.5 text-left text-sm text-danger hover:bg-surface-2"
+                        className="block w-full border-t border-line px-4 py-2.5 text-left font-mono text-sm text-danger hover:bg-surface-2"
                       >
-                        Sign out
+                        sign out
                       </button>
                     </div>
                   </>
@@ -172,10 +194,10 @@ export function SiteHeader() {
           ) : (
             <>
               <Link href="/login" className="btn btn-ghost hidden sm:inline-flex">
-                Log in
+                log in
               </Link>
               <Link href="/signup" className="btn btn-primary">
-                Get started
+                get started
               </Link>
             </>
           )}

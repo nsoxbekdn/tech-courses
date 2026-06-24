@@ -47,7 +47,7 @@ export function CourseCatalog({
       }
     });
     return list;
-  }, [level, query, sort]);
+  }, [level, query, sort, courses]);
 
   return (
     <div>
@@ -58,13 +58,13 @@ export function CourseCatalog({
             <button
               key={t}
               onClick={() => setLevel(t)}
-              className={`rounded-[var(--radius)] px-4 py-2 text-sm font-semibold transition-colors ${
+              className={`rounded-[var(--radius)] px-4 py-2 font-mono text-sm font-semibold lowercase transition-colors ${
                 level === t
                   ? "bg-ink-panel text-on-panel"
                   : "border border-line bg-surface text-ink-soft hover:border-line-strong hover:text-ink"
               }`}
             >
-              {t === "All" ? "All tracks" : t}
+              {t === "All" ? "all tracks" : t}
             </button>
           ))}
         </div>
@@ -92,10 +92,11 @@ export function CourseCatalog({
         </div>
       </div>
 
-      <p className="mt-5 text-sm text-muted">
-        Showing <strong className="tnum text-ink">{filtered.length}</strong>{" "}
+      <p className="mt-5 font-mono text-sm text-muted">
+        <span className="text-line-strong">❯</span> showing{" "}
+        <strong className="tnum text-ink">{filtered.length}</strong>{" "}
         {filtered.length === 1 ? "course" : "courses"}
-        {level !== "All" && ` in ${level}`}
+        {level !== "All" && ` in ${level.toLowerCase()}`}
       </p>
 
       {filtered.length === 0 ? (

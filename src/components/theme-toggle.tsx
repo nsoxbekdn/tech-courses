@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { MoonIcon, SunIcon } from "./icons";
 
 /** Inline script (runs before paint in <head>) to set the theme with no flash. */
-export const themeScript = `(function(){try{var t=localStorage.getItem('ca-theme');if(t!=='light'&&t!=='dark'){t=new URLSearchParams(location.search).get('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}var e=document.documentElement;e.classList.toggle('dark',t==='dark');e.style.colorScheme=t;}catch(e){}})();`;
+export const themeScript = `(function(){try{var t=localStorage.getItem('ca-theme');if(t!=='light'&&t!=='dark'){t=new URLSearchParams(location.search).get('theme')||'dark';}var e=document.documentElement;e.classList.toggle('dark',t==='dark');e.style.colorScheme=t;}catch(e){}})();`;
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">("light");

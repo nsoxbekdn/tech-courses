@@ -5,7 +5,9 @@ import { LEVELS } from "@/lib/course-utils";
 import { formatCompact } from "@/lib/format";
 import { CourseCard } from "@/components/course-card";
 import { Reveal } from "@/components/reveal";
-import { Avatar, Thumbnail } from "@/components/ui";
+import { Avatar } from "@/components/ui";
+import { HeroTerminal } from "@/components/hero/hero-terminal";
+import { AsciiDivider, AsciiCorners } from "@/components/ascii/ascii-block";
 import {
   ArrowRightIcon,
   BookIcon,
@@ -48,8 +50,8 @@ export default async function HomePage() {
   const userEnrollments = sessionUser ? await getUserEnrollments(sessionUser.id) : [];
   const popular = [...courses].sort((a, b) => b.views - a.views).slice(0, 6);
 
-  // Hero "Now playing" card: user's most-recently-enrolled course with progress,
-  // falling back to the most-viewed published course.
+  // Hero pane: user's most-recently-enrolled course with progress, falling back
+  // to the most-viewed published course.
   const byViews = [...courses].sort((a, b) => b.views - a.views);
   let heroCourse = byViews[0];
   let heroProgress = 0;
@@ -71,98 +73,52 @@ export default async function HomePage() {
   }
 
   const stats = [
-    { value: `${formatCompact(channelStats.subscribers)}+`, label: "Subscribers" },
-    { value: String(channelStats.courseCount), label: "Courses" },
-    { value: `${formatCompact(channelStats.lessonCount)}+`, label: "Lessons" },
-    { value: `${formatCompact(channelStats.totalViews)}+`, label: "Total views" },
+    { value: `${formatCompact(channelStats.subscribers)}+`, label: "subscribers" },
+    { value: String(channelStats.courseCount), label: "courses" },
+    { value: `${formatCompact(channelStats.lessonCount)}+`, label: "lessons" },
+    { value: `${formatCompact(channelStats.totalViews)}+`, label: "total views" },
   ];
 
   return (
     <>
-      {/* Hero */}
-      <section className="border-b border-line">
-        <div className="container-page grid items-center gap-12 py-16 md:grid-cols-[1.05fr_0.95fr] md:py-24">
-          <div>
-            <p className="eyebrow reveal">Free · from the Tech Courses channel</p>
-            <h1
-              className="reveal mt-4 text-[clamp(2.4rem,6vw,3.6rem)] font-extrabold leading-[1.05] text-ink"
-              style={{ animationDelay: "60ms" }}
-            >
-              Certifications and coding,
-              <br />
-              taught in full.
-            </h1>
-            <p
-              className="reveal mt-5 max-w-md text-lg leading-relaxed text-muted"
-              style={{ animationDelay: "120ms" }}
-            >
-              Structured, chapter-by-chapter video courses for India&apos;s NISM securities
-              certifications and competitive programming — free, self-paced, and built to finish.
-            </p>
-            <div
-              className="reveal mt-8 flex flex-wrap gap-3"
-              style={{ animationDelay: "180ms" }}
-            >
-              <Link href="/courses" className="btn btn-primary">
-                Explore courses <ArrowRightIcon width={17} height={17} />
-              </Link>
-              <Link href="/signup" className="btn btn-outline">
-                Start free
+      {/* Hero — full-viewport terminal session */}
+      <section className="relative">
+        <div className="container-page flex min-h-[calc(100svh-4rem)] flex-col justify-center py-14 md:py-16">
+          {heroCourse ? (
+            <HeroTerminal
+              title={heroCourse.title}
+              level={heroCourse.level}
+              code={heroCourse.code ?? heroCourse.level.slice(0, 3)}
+              views={heroCourse.views}
+              href={heroHref}
+              progress={heroProgress}
+              isAuthed={!!sessionUser}
+              subscribers={channelStats.subscribers}
+              courseCount={channelStats.courseCount}
+              lessonCount={channelStats.lessonCount}
+            />
+          ) : (
+            <div>
+              <h1 className="text-[clamp(2.6rem,7vw,4.6rem)] font-bold leading-[0.98] text-ink">
+                Compile your <span className="text-accent">career.</span>
+              </h1>
+              <Link href="/courses" className="btn btn-primary mt-8">
+                explore courses <ArrowRightIcon width={16} height={16} />
               </Link>
             </div>
-          </div>
-
-          {/* Product preview — user-specific or most popular course */}
-          {heroCourse && (
-            <Link
-              href={heroHref}
-              className="reveal card overflow-hidden transition-[border-color,box-shadow] duration-200 hover:border-line-strong hover:shadow-md"
-              style={{ animationDelay: "240ms" }}
-            >
-              <Thumbnail
-                src={heroCourse.thumbnail || undefined}
-                watermark={heroCourse.code ?? heroCourse.level.slice(0, 3)}
-                className="aspect-[16/10]"
-                sizes="(min-width: 768px) 45vw, 100vw"
-              >
-                <div className="absolute inset-0 bg-ink-panel/30" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="grid h-14 w-14 place-items-center rounded-full bg-white/10 text-on-panel ring-1 ring-white/15">
-                    <PlayCircleIcon width={30} height={30} />
-                  </span>
-                </div>
-                <span className="absolute left-4 top-4 tag border-white/15 bg-white/10 text-on-panel">
-                  {heroProgress > 0 ? "Continue" : "Now playing"}
-                </span>
-              </Thumbnail>
-              <div className="p-5">
-                <p className="truncate font-semibold text-ink">{heroCourse.title}</p>
-                <p className="mt-0.5 text-sm text-muted">
-                  {heroCourse.level} · {formatCompact(heroCourse.views)} views
-                </p>
-                {sessionUser && (
-                  <div className="mt-4 flex items-center gap-3">
-                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-surface-2">
-                      <div
-                        className="h-full rounded-full bg-accent"
-                        style={{ width: `${heroProgress}%` }}
-                      />
-                    </div>
-                    <span className="tnum text-xs text-muted">{heroProgress}%</span>
-                  </div>
-                )}
-              </div>
-            </Link>
           )}
-        </div>
 
-        {/* Stat strip */}
-        <div className="border-t border-line">
-          <dl className="container-page grid grid-cols-2 divide-x divide-line md:grid-cols-4">
+          {/* Stat strip — a terminal status bar */}
+          <dl className="mt-12 grid grid-cols-2 divide-x divide-line border-y border-line md:mt-16 md:grid-cols-4">
             {stats.map((s) => (
-              <div key={s.label} className="px-2 py-7 text-center first:pl-0">
-                <dt className="tnum text-2xl font-bold text-ink md:text-3xl">{s.value}</dt>
-                <dd className="mt-1 text-xs text-muted">{s.label}</dd>
+              <div key={s.label} className="px-2 py-6 text-center first:pl-0">
+                <dt className="tnum font-mono text-2xl font-bold text-ink md:text-3xl">
+                  {s.value}
+                </dt>
+                <dd className="mono-label mt-1">
+                  {"// "}
+                  {s.label}
+                </dd>
               </div>
             ))}
           </dl>
@@ -171,37 +127,51 @@ export default async function HomePage() {
 
       {/* Tracks */}
       <section className="container-page py-16 md:py-20">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-ink md:text-3xl">Choose your track</h2>
-            <p className="mt-2 text-muted">Two tracks, one channel.</p>
-          </div>
-        </div>
-        <Reveal
-          stagger
-          className="mt-8 grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-line bg-line md:grid-cols-2"
-        >
+        <AsciiDivider index="01" label="choose your track" />
+        <h2 className="mt-6 text-2xl font-bold text-ink md:text-3xl">
+          Two tracks, one channel.
+        </h2>
+        <p className="mt-2 max-w-md text-muted">
+          Pick a path and follow it chapter by chapter — or run both in parallel.
+        </p>
+        <Reveal stagger className="mt-8 grid gap-5 md:grid-cols-2">
           {LEVELS.map((lvl, i) => {
             const count = courses.filter((c) => c.level === lvl.key).length;
             return (
               <Link
                 key={lvl.key}
                 href={`/courses?level=${lvl.key}`}
-                className="group flex flex-col gap-3 bg-surface p-7 transition-colors hover:bg-surface-2"
+                className="term group relative transition-colors hover:border-line-strong"
               >
-                <span className="font-mono text-sm text-muted">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="text-xl font-bold text-ink">{lvl.label}</h3>
-                <p className="text-sm text-muted">{lvl.blurb}</p>
-                <span className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
-                  <span className="tnum">{count}</span> courses
-                  <ArrowRightIcon
-                    width={15}
-                    height={15}
-                    className="transition-transform duration-200 group-hover:translate-x-1"
-                  />
-                </span>
+                <AsciiCorners />
+                <div className="term-bar">
+                  <span className="term-dots" aria-hidden>
+                    <span className="term-dot" />
+                    <span className="term-dot" />
+                    <span className="term-dot" />
+                  </span>
+                  <span className="term-title">tracks/{lvl.key.toLowerCase()}</span>
+                  <span className="ml-auto mono-label">
+                    <span className="tnum">{String(count).padStart(2, "0")}</span> courses
+                  </span>
+                </div>
+                <div className="p-6">
+                  <span className="section-marker">
+                    <b>{String(i + 1).padStart(2, "0")}</b>
+                    {" // "}
+                    {lvl.key.toLowerCase()}
+                  </span>
+                  <h3 className="mt-3 text-xl font-bold text-ink">{lvl.label}</h3>
+                  <p className="mt-2 text-sm text-muted">{lvl.blurb}</p>
+                  <span className="mt-5 inline-flex items-center gap-1.5 font-mono text-sm font-semibold text-accent">
+                    open
+                    <ArrowRightIcon
+                      width={15}
+                      height={15}
+                      className="transition-transform duration-200 group-hover:translate-x-1"
+                    />
+                  </span>
+                </div>
               </Link>
             );
           })}
@@ -210,16 +180,21 @@ export default async function HomePage() {
 
       {/* Popular courses */}
       <section className="container-page py-4">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <h2 className="text-2xl font-bold text-ink md:text-3xl">Most-watched courses</h2>
+        <div className="flex items-end justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <AsciiDivider index="02" label="most-watched" />
+            <h2 className="mt-6 text-2xl font-bold text-ink md:text-3xl">
+              Courses students actually finish.
+            </h2>
+          </div>
           <Link
             href="/courses"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
+            className="link-draw mb-1 inline-flex shrink-0 items-center gap-1.5 font-mono text-sm font-semibold text-accent"
           >
-            View all <ArrowRightIcon width={15} height={15} />
+            view all <ArrowRightIcon width={15} height={15} />
           </Link>
         </div>
-        <Reveal stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal stagger className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {popular.map((c) => (
             <CourseCard key={c.id} course={c} />
           ))}
@@ -228,20 +203,25 @@ export default async function HomePage() {
 
       {/* Features */}
       <section className="container-page py-16 md:py-24">
-        <h2 className="max-w-2xl text-2xl font-bold text-ink md:text-3xl">
+        <AsciiDivider index="03" label="why tech courses" />
+        <h2 className="mt-6 max-w-2xl text-2xl font-bold text-ink md:text-3xl">
           Built to get you certified — and job-ready.
         </h2>
         <Reveal
           stagger
           className="mt-10 grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-line bg-line sm:grid-cols-2"
         >
-          {features.map((f) => (
+          {features.map((f, i) => (
             <div key={f.title} className="flex gap-4 bg-surface p-7">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius)] bg-accent-tint text-accent">
                 <f.icon width={19} height={19} />
               </span>
               <div>
-                <h3 className="font-semibold text-ink">{f.title}</h3>
+                <p className="mono-label">
+                  <span className="text-accent">{String(i + 1).padStart(2, "0")}</span> /{" "}
+                  feature
+                </p>
+                <h3 className="mt-1 font-semibold text-ink">{f.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.body}</p>
               </div>
             </div>
@@ -251,22 +231,28 @@ export default async function HomePage() {
 
       {/* Instructor */}
       <section className="container-page py-4">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-ink md:text-3xl">Your instructor</h2>
-          <p className="mt-2 text-muted">Behind the Tech Courses channel.</p>
-        </div>
-        <Reveal stagger className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <AsciiDivider index="04" label="maintainer" />
+        <h2 className="mt-6 text-2xl font-bold text-ink md:text-3xl">
+          Behind the channel.
+        </h2>
+        <Reveal stagger className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[instructor].map((ins) => (
-            <div key={ins.id} className="card p-6">
-              <Avatar initials={ins.initials} size={52} />
-              <h3 className="mt-4 font-semibold text-ink">{ins.name}</h3>
-              <p className="mt-0.5 text-xs text-muted">{ins.title}</p>
-              <div className="mt-4 border-t border-line pt-3">
-                <p className="tnum text-xs text-muted">
-                  {formatCompact(ins.students)} subscribers · {ins.coursesCount} courses
-                </p>
+            <div key={ins.id} className="term relative">
+              <AsciiCorners />
+              <div className="term-bar">
+                <span className="term-title">whoami</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-ink-soft">{ins.bio}</p>
+              <div className="p-6">
+                <Avatar initials={ins.initials} size={52} />
+                <h3 className="mt-4 font-semibold text-ink">{ins.name}</h3>
+                <p className="mono-label mt-0.5">{ins.title}</p>
+                <div className="mt-4 border-t border-line pt-3">
+                  <p className="tnum mono-label">
+                    {formatCompact(ins.students)} subscribers · {ins.coursesCount} courses
+                  </p>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-ink-soft">{ins.bio}</p>
+              </div>
             </div>
           ))}
         </Reveal>
@@ -274,21 +260,35 @@ export default async function HomePage() {
 
       {/* CTA */}
       <section className="container-page py-20">
-        <Reveal className="thumb relative overflow-hidden rounded-[var(--radius-lg)] px-8 py-16 text-center">
-          <h2 className="text-2xl font-bold text-on-panel md:text-4xl">
-            Start learning today — free.
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-on-panel-soft">
-            Create a free account to track your progress across courses, or jump straight into
-            any lesson.
-          </p>
-          <div className="mt-8 flex justify-center gap-3">
-            <Link href="/signup" className="btn btn-primary">
-              Create free account
-            </Link>
-            <Link href="/courses" className="btn btn-on-panel">
-              Browse courses
-            </Link>
+        <Reveal className="term relative overflow-hidden">
+          <AsciiCorners tone="muted" />
+          <div className="term-bar">
+            <span className="term-dots" aria-hidden>
+              <span className="term-dot" />
+              <span className="term-dot" />
+              <span className="term-dot" />
+            </span>
+            <span className="term-title">tech-courses — start</span>
+          </div>
+          <div className="px-6 py-14 text-center md:py-16">
+            <p className="mono-label">
+              <span className="term-prompt text-accent" />tc signup --free
+            </p>
+            <h2 className="mx-auto mt-4 max-w-2xl text-2xl font-bold text-ink md:text-4xl">
+              Start learning today — free.
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-muted">
+              Create a free account to track your progress across courses, or jump
+              straight into any lesson.
+            </p>
+            <div className="mt-8 flex justify-center gap-3">
+              <Link href="/signup" className="btn btn-primary">
+                create free account
+              </Link>
+              <Link href="/courses" className="btn btn-outline">
+                browse courses
+              </Link>
+            </div>
           </div>
         </Reveal>
       </section>

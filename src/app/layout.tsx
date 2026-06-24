@@ -5,6 +5,8 @@ import { StoreProvider } from "@/lib/store";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { themeScript } from "@/components/theme-toggle";
+import { LenisProvider } from "@/components/motion/lenis-provider";
+import { BackgroundField } from "@/components/background/background-field";
 import { getCurrentUser, getUserEnrollments } from "@/lib/auth";
 import { isAdmin } from "@/lib/admin";
 
@@ -40,14 +42,17 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col">
+        <BackgroundField />
         <StoreProvider
           initialUser={initialUser}
           initialEnrollments={initialEnrollments}
           initialIsAdmin={initialIsAdmin}
         >
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
+          <LenisProvider>
+            <SiteHeader />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </LenisProvider>
         </StoreProvider>
       </body>
     </html>

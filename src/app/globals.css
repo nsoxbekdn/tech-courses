@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 /* =========================================================================
-   Tech Courses Academy — "Precision Light / Precision Dark"
-   Off-white paper, ink type, one deep-green accent. Hairlines, sharp radii,
-   tabular figures. Tokens live on :root/.dark and are surfaced to Tailwind
-   via @theme inline so utilities switch at runtime.
+   Tech Courses Academy — "Black & Shining Silver" (terminal identity)
+   True-black canvas, ink/paper type, one brushed-chrome silver accent.
+   Hairlines, sharp radii, tabular figures. Tokens live on :root/.dark and
+   are surfaced to Tailwind via @theme inline so utilities switch at runtime.
+   Default theme is dark (black); a platinum light mode ships via the toggle.
    ========================================================================= */
 
 @theme inline {
@@ -26,7 +27,9 @@
   --color-danger: var(--c-danger);
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-mono: var(--font-geist-mono), ui-monospace, "IBM Plex Mono", monospace;
+  /* The structural / display voice of the terminal identity is monospace. */
+  --font-display: var(--font-geist-mono), ui-monospace, "IBM Plex Mono", monospace;
 
   /* Surfaced so `shadow-sm/md/pop` utilities generate AND switch with the theme. */
   --shadow-sm: var(--s-sm);
@@ -51,10 +54,30 @@
   --c-muted: oklch(0.5 0.009 255);
   --c-line: oklch(0.915 0.004 255);
   --c-line-strong: oklch(0.86 0.005 255);
-  --c-accent: oklch(0.46 0.094 159);
-  --c-accent-strong: oklch(0.4 0.092 159);
-  --c-accent-tint: oklch(0.965 0.022 159);
+  /* Light = platinum: gunmetal "silver" reads on paper (AA), chrome on buttons. */
+  --c-accent: oklch(0.44 0.006 264);
+  --c-accent-strong: oklch(0.36 0.006 264);
+  --c-accent-tint: oklch(0.95 0.002 264);
   --c-accent-ink: oklch(0.99 0 0);
+
+  /* Brushed-chrome gradient — the "shining silver". Same metal both themes. */
+  --metal: linear-gradient(
+    180deg,
+    oklch(0.96 0.003 264) 0%,
+    oklch(0.8 0.005 264) 46%,
+    oklch(0.66 0.006 264) 54%,
+    oklch(0.84 0.004 264) 100%
+  );
+  --metal-strong: linear-gradient(
+    180deg,
+    oklch(1 0 0) 0%,
+    oklch(0.88 0.004 264) 46%,
+    oklch(0.74 0.006 264) 54%,
+    oklch(0.92 0.003 264) 100%
+  );
+  --metal-ink: oklch(0.18 0.004 264);
+  --metal-edge: oklch(1 0 0 / 0.6);
+
   --c-ink-panel: oklch(0.205 0.014 255);
   --c-on-panel: oklch(0.97 0.003 240);
   --c-on-panel-soft: oklch(0.72 0.012 255);
@@ -69,20 +92,21 @@
 }
 
 .dark {
-  /* Dark — near-black cool canvas */
-  --c-bg: oklch(0.17 0.01 255);
-  --c-surface: oklch(0.205 0.012 255);
-  --c-surface-2: oklch(0.245 0.012 255);
-  --c-ink: oklch(0.955 0.004 255);
-  --c-ink-soft: oklch(0.82 0.007 255);
-  --c-muted: oklch(0.67 0.009 255);
-  --c-line: oklch(0.3 0.012 255);
-  --c-line-strong: oklch(0.38 0.013 255);
-  --c-accent: oklch(0.62 0.13 160);
-  --c-accent-strong: oklch(0.69 0.14 160);
-  --c-accent-tint: oklch(0.27 0.04 160);
-  --c-accent-ink: oklch(0.16 0.01 255);
-  --c-ink-panel: oklch(0.135 0.01 255);
+  /* Dark — true-black, neutral canvas so silver reads as metal (not teal). */
+  --c-bg: oklch(0.15 0.004 264);
+  --c-surface: oklch(0.19 0.005 264);
+  --c-surface-2: oklch(0.23 0.005 264);
+  --c-ink: oklch(0.96 0.002 264);
+  --c-ink-soft: oklch(0.82 0.004 264);
+  --c-muted: oklch(0.66 0.005 264);
+  --c-line: oklch(0.3 0.006 264);
+  --c-line-strong: oklch(0.4 0.007 264);
+  /* Bright chrome-silver — shines on black. */
+  --c-accent: oklch(0.82 0.006 264);
+  --c-accent-strong: oklch(0.9 0.008 264);
+  --c-accent-tint: oklch(0.3 0.005 264);
+  --c-accent-ink: oklch(0.17 0.004 264);
+  --c-ink-panel: oklch(0.12 0.004 264);
   --c-on-panel: oklch(0.95 0.004 255);
   --c-on-panel-soft: oklch(0.7 0.01 255);
   --c-danger: oklch(0.7 0.15 25);
@@ -99,8 +123,22 @@
   border-color: var(--c-line);
 }
 
-html {
-  scroll-behavior: smooth;
+/* Lenis owns scrolling; native smooth-scroll would fight it. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 body {
@@ -117,12 +155,16 @@ body {
   font-feature-settings: "tnum" 1;
 }
 
+/* Monospace is the structural voice: headings read like terminal output.
+   Long-form body copy stays in --font-sans for hours-of-study legibility. */
 h1,
 h2,
 h3,
 h4 {
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
   text-wrap: balance;
+  font-feature-settings: "tnum" 1, "ss01" 1;
 }
 
 ::selection {
@@ -164,6 +206,8 @@ h4 {
     line-height: 1;
     padding: 0.7rem 1.1rem;
     border: 1px solid transparent;
+    font-family: var(--font-mono);
+    letter-spacing: 0.01em;
     transition: background 0.15s var(--ease-out-quint),
       border-color 0.15s var(--ease-out-quint), color 0.15s, transform 0.12s,
       box-shadow 0.15s;
@@ -178,11 +222,46 @@ h4 {
     cursor: not-allowed;
   }
   .btn-primary {
-    background: var(--c-accent);
-    color: var(--c-accent-ink);
+    position: relative;
+    overflow: hidden;
+    background: var(--metal);
+    color: var(--metal-ink);
+    border-color: oklch(0 0 0 / 0.22);
+    box-shadow: inset 0 1px 0 var(--metal-edge), var(--s-sm);
+    text-shadow: 0 1px 0 oklch(1 0 0 / 0.3);
   }
   .btn-primary:hover:not(:disabled) {
-    background: var(--c-accent-strong);
+    background: var(--metal-strong);
+  }
+
+  /* Brushed-chrome surface (the TC mark, accent chips). */
+  .metal {
+    position: relative;
+    overflow: hidden;
+    background: var(--metal);
+    color: var(--metal-ink);
+    box-shadow: inset 0 1px 0 var(--metal-edge);
+  }
+
+  /* A specular highlight that sweeps across on hover — the "shine". */
+  .btn-primary::after,
+  .metal::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 32%,
+      oklch(1 0 0 / 0.6) 50%,
+      transparent 68%
+    );
+    transform: translateX(-130%);
+    transition: transform 0.6s var(--ease-out-expo);
+  }
+  .btn-primary:hover::after,
+  .metal:hover::after {
+    transform: translateX(130%);
   }
   .btn-outline {
     background: var(--c-surface);
@@ -314,6 +393,187 @@ h4 {
   .reveal-stagger.is-revealed > *:nth-child(6) { transition-delay: 350ms; }
 }
 
+/* =========================================================================
+   Terminal / ASCII layer — the developer identity. Built on the same
+   precision tokens (black, ink, one shining-silver accent). No glow, no neon.
+   ========================================================================= */
+@layer components {
+  /* Raw ASCII art: fixed grid, no kerning, no wrapping. */
+  .ascii {
+    font-family: var(--font-mono);
+    white-space: pre;
+    line-height: 1.06;
+    letter-spacing: 0;
+    font-feature-settings: normal;
+    -webkit-font-smoothing: antialiased;
+  }
+  .ascii-dim {
+    color: var(--c-line-strong);
+  }
+  .ascii-accent {
+    color: var(--c-accent);
+  }
+
+  /* Mono metadata label — denser than .eyebrow, used inside terminal chrome. */
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--c-muted);
+  }
+
+  /* Terminal window — the core surface for cards, panes, the hero console. */
+  .term {
+    position: relative;
+    background: var(--c-surface);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--c-line);
+    background: var(--c-surface-2);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1;
+    color: var(--c-muted);
+    user-select: none;
+  }
+  /* Monochrome window dots — reads as a window without the SaaS traffic-light cliché. */
+  .term-dots {
+    display: inline-flex;
+    gap: 0.34rem;
+  }
+  .term-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--c-line-strong);
+  }
+  .term-title {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--c-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .term-body {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--c-ink-soft);
+  }
+  /* A shell prompt glyph. */
+  .term-prompt::before {
+    content: "❯ ";
+    color: var(--c-accent);
+    font-weight: 600;
+  }
+
+  /* Blinking block caret. Reduced-motion freezes it solid (still visible). */
+  .caret::after {
+    content: "▍";
+    margin-left: 0.05em;
+    color: var(--c-accent);
+    animation: caret-blink 1.05s steps(1) infinite;
+  }
+  .caret-bare::after {
+    content: "";
+  }
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Link underline that draws itself on hover/focus. */
+  .link-draw {
+    background-image: linear-gradient(var(--c-accent), var(--c-accent));
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.28s var(--ease-out-expo);
+  }
+  .link-draw:hover,
+  .link-draw:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* Terminal nav item: [ label ] with a character that reveals on hover. */
+  .term-nav {
+    position: relative;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    letter-spacing: 0.01em;
+    color: var(--c-ink-soft);
+    transition: color 0.14s;
+  }
+  .term-nav::before {
+    content: "[";
+    color: var(--c-line-strong);
+    margin-right: 0.15em;
+    transition: color 0.14s;
+  }
+  .term-nav::after {
+    content: "]";
+    color: var(--c-line-strong);
+    margin-left: 0.15em;
+    transition: color 0.14s;
+  }
+  .term-nav:hover,
+  .term-nav[data-active="true"] {
+    color: var(--c-ink);
+  }
+  .term-nav:hover::before,
+  .term-nav:hover::after,
+  .term-nav[data-active="true"]::before,
+  .term-nav[data-active="true"]::after {
+    color: var(--c-accent);
+  }
+
+  /* Ultra-subtle film grain, layered behind content. */
+  .bg-noise::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.018;
+    mix-blend-mode: multiply;
+  }
+  .dark .bg-noise::before {
+    opacity: 0.04;
+    mix-blend-mode: screen;
+  }
+
+  /* Fixed HUD readout (coordinate / status system). */
+  .hud {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    color: var(--c-muted);
+  }
+
+  /* Section index marker, e.g. "02 // choose your track". */
+  .section-marker {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-muted);
+  }
+  .section-marker b {
+    color: var(--c-accent);
+    font-weight: 600;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .reveal-on-scroll,
   .reveal-stagger > * {
@@ -337,5 +597,10 @@ h4 {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+  /* Keep the caret a solid, legible block instead of frozen mid-blink. */
+  .caret::after {
+    opacity: 1 !important;
+    animation: none !important;
   }
 }

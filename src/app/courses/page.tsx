@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CourseCatalog } from "@/components/course-catalog";
 import { getCourses } from "@/lib/catalog";
 import type { CourseLevel } from "@/lib/types";
+import { AsciiDivider } from "@/components/ascii/ascii-block";
 
 export const metadata: Metadata = {
   title: "All courses",
@@ -26,9 +27,13 @@ export default async function CoursesPage({
 
   return (
     <>
-      <section className="border-b border-line bg-surface">
+      <section className="border-b border-line bg-surface/70">
         <div className="container-page py-12">
-          <h1 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
+          <AsciiDivider index="ls" label="catalog" />
+          <p className="mt-5 font-mono text-xs text-muted">
+            <span className="term-prompt text-accent" />tc ls --tracks all
+          </p>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
             Explore courses
           </h1>
           <p className="mt-3 max-w-2xl text-ink-soft">
