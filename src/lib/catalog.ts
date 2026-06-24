@@ -189,7 +189,7 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
     orderBy: [{ published: "desc" }, { order: "asc" }, { ytTitle: "asc" }],
     include: { lessons: { orderBy: { position: "asc" } } },
   });
-  return rows.map((r) => ({
+  return rows.map((r: (typeof rows)[number]) => ({
     id: r.id,
     slug: r.slug,
     ytTitle: r.ytTitle,
@@ -206,7 +206,7 @@ export async function getAdminCourses(): Promise<AdminCourseRow[]> {
     examInfo: r.examInfo,
     mockTestUrl: r.mockTestUrl,
     syncedAt: fmtDate(r.syncedAt),
-    lessons: r.lessons.map((l) => ({
+    lessons: r.lessons.map((l: (typeof r.lessons)[number]) => ({
       id: l.id,
       ytVideoId: l.ytVideoId,
       title: l.title,

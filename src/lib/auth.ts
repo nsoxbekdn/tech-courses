@@ -107,7 +107,7 @@ export async function getUserEnrollments(userId: string): Promise<ClientEnrollme
     doneByCourse.set(p.courseId, arr);
   }
 
-  return enrollments.map((e) => ({
+  return enrollments.map((e: (typeof enrollments)[number]) => ({
     courseId: e.courseId,
     enrolledAt: e.enrolledAt.toISOString(),
     completedLessonIds: doneByCourse.get(e.courseId) ?? [],
