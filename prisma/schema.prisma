@@ -21,6 +21,7 @@ model User {
   sessions     Session[]
   enrollments  Enrollment[]
   progress     Progress[]
+  payments     Payment[]
 }
 
 model Session {
@@ -79,6 +80,8 @@ model Course {
   level         String   @default("")
   code          String?
   order         Int      @default(0)
+  priceInr      Int      @default(0) // 0 = free
+  mrpInr        Int      @default(0)
   titleOverride String?
   descOverride  String?
   examInfo      String?  // certification exam details (passing %, fees, format)
@@ -104,6 +107,23 @@ model Lesson {
 
   @@unique([courseId, ytVideoId])
   @@index([courseId])
+}
+
+// Razorpay order lifecycle, one row per checkout attempt. Enrollment is only
+// granted once the signature on the paid row is verified (see api/payments/verify).
+model Payment {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  orderId     String   @unique
+  paymentId   String?
+  amountPaise Int
+  status      String   @default("created") // created | paid | failed
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 // Admin allowlist (by email, so they can be granted access before signing up).
